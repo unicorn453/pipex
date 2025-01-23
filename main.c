@@ -6,75 +6,155 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:57:00 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/23 18:58:32 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/23 21:09:21 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-typedef struct s_parse {
+typedef struct s_parse
+{
     bool input;
     char *file;
     char *cmd;
     char *option;
     char *pattern;
-    char **args; // To store arguments for execve
+    char **args;
 } t_parse;
 
-// Has two parts because of the pipe
-typedef struct s_cmd {
+typedef struct s_cmd
+{
     t_parse *parse[2];
-    char *fd_in;  // Input file path
-    char *fd_out; // Output file path
+    char *fd_in;
+    char *fd_out;
+    char **envp;
 } t_cmd;
 
 
+char *find_command_path(char *cmd, char **envp)
+{
+    char *path_env = NULL;
+    char **paths = NULL;
+    char *full_path = NULL;
+    struct stat sb;
+    int i = 0;
 
-int ft_in_out(char *file, int mode) {
+    while (envp[i])
+    {
+        if (ft_strncmp(envp[i], "PATH=", 5) == 0)
+        {
+            path_env = envp[i] + 5;
+            break;
+        }
+        i++;
+    }
+
+    if (!path_env)
+        return NULL;
+
+    paths = ft_split(path_env, ':');
+    if (!paths)
+    {
+        perror("ft_split");
+        exit(1);
+    }
+
+    for (i = 0; paths[i]; i++)
+    {
+        full_path = ft_strjoin(paths[i], "/");
+        if (!full_path)
+        {
+            perror("ft_strjoin");
+            exit(1);
+        }
+
+        char *temp = ft_strjoin(full_path, cmd);
+        free(full_path);
+        full_path = temp;
+
+        if (!full_path)
+        {
+            perror("ft_strjoin");
+            exit(1);
+        }
+
+        if (stat(full_path, &sb) == 0 && (sb.st_mode & S_IXUSR))
+        {
+            for (int j = 0; paths[j]; j++)
+                free(paths[j]);
+            free(paths);
+            return full_path;
+        }
+
+        free(full_path);
+        full_path = NULL;
+    }
+
+    for (i = 0; paths[i]; i++)
+        free(paths[i]);
+    free(paths);
+
+    return NULL;
+}
+
+
+int ft_in_out(char *file, int mode)
+{
     int fd;
-    if (mode == 0) { // Input file
+    if (mode == 0)
+    {
         fd = open(file, O_RDONLY);
-        if (fd < 0) {
+        if (fd < 0)
+        {
             perror("open");
             exit(1);
         }
-    } else if (mode == 1) { // Output file
+    }
+    else if (mode == 1)
+    {
         fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        if (fd < 0) {
+        if (fd < 0)
+        {
             perror("open");
             exit(1);
         }
-    } else {
+    }
+    else
+    {
         fd = -1;
     }
     return fd;
 }
 
-t_parse *init_parse(char *file, char *commands, bool input) {
+t_parse *init_parse(char *file, char *commands, bool input)
+{
     t_parse *parse = malloc(sizeof(t_parse));
-    if (!parse) {
+    if (!parse)
+    {
         perror("malloc");
         exit(1);
     }
     parse->input = input;
     parse->file = ft_strdup(file);
-    if (!parse->file) {
+    if (!parse->file)
+    {
         perror("ft_strdup");
         free(parse);
         exit(1);
     }
 
     char **str = ft_split(commands, ' ');
-    if (!str) {
+    if (!str)
+    {
         perror("ft_split");
         free(parse);
         exit(1);
     }
 
-    // Assign arguments based on space count
     parse->cmd = ft_strdup(str[0]);
-    parse->args = str; // Save the entire split array for execve
-    if (!parse->cmd) {
+    parse->args = str;
+    if (!parse->cmd)
+    {
         perror("ft_strdup");
         free(parse);
         exit(1);
@@ -85,81 +165,90 @@ t_parse *init_parse(char *file, char *commands, bool input) {
     return parse;
 }
 
-
-void pipe_and_fork(t_cmd *cmd) {
+void pipe_and_fork(t_cmd *cmd, char **envp)
+{
     int pipefd[2];
-    if (pipe(pipefd) == -1) {
+    if (pipe(pipefd) == -1)
+    {
         perror("pipe");
         exit(EXIT_FAILURE);
     }
 
     pid_t pid = fork();
-    if (pid == -1) {
+    if (pid == -1)
+    {
         perror("fork");
         exit(EXIT_FAILURE);
     }
 
-    if (pid == 0) {
-        // Child process
-        dup2(pipefd[1], STDOUT_FILENO); // Redirect stdout to write end of the pipe
-        close(pipefd[0]);              // Close unused read end
-        close(pipefd[1]);
-
-        // Execute command
-        execve(cmd->parse[0]->cmd, cmd->parse[0]->args, NULL);
-        perror("execve");
-        exit(EXIT_FAILURE);
-    } else {
-        // Parent process
-        dup2(pipefd[0], STDIN_FILENO); // Redirect stdin to read end of the pipe
+    if (pid == 0) 
+    {
+        dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[0]);
         close(pipefd[1]);
 
-        // Wait for child process
+        char *cmd_path = find_command_path(cmd->parse[0]->cmd, envp);
+        if (!cmd_path)
+        {
+            fprintf(stderr, "Command not found: %s\n", cmd->parse[0]->cmd);
+            exit(1);
+        }
+
+        execve(cmd_path, cmd->parse[0]->args, envp);
+        perror("execve");
+        free(cmd_path);
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        dup2(pipefd[0], STDIN_FILENO);
+        close(pipefd[0]);
+        close(pipefd[1]);
+
         waitpid(pid, NULL, 0);
 
-        // Execute second command
-        execve(cmd->parse[1]->cmd, cmd->parse[1]->args, NULL);
+        char *cmd_path = find_command_path(cmd->parse[1]->cmd, envp);
+        if (!cmd_path)
+        {
+            fprintf(stderr, "Command not found: %s\n", cmd->parse[1]->cmd);
+            exit(1);
+        }
+
+        execve(cmd_path, cmd->parse[1]->args, envp);
         perror("execve");
+        free(cmd_path);
         exit(EXIT_FAILURE);
     }
 }
 
 
-int main(int argc, char **argv) {
-    if (argc != 5) {
+int main(int argc, char **argv, char **envp)
+{
+    if (argc != 5)
+    {
         fprintf(stderr, "Usage: %s infile 'cmd1 args' 'cmd2 args' outfile\n", argv[0]);
         exit(1);
     }
 
     t_cmd *cmd = malloc(sizeof(t_cmd));
-    if (!cmd) {
+    if (!cmd)
+    {
         perror("malloc");
         exit(1);
     }
 
-    // Initialize commands
-    cmd->parse[0] = init_parse(argv[1], argv[2], true);  // First command
-    cmd->parse[1] = init_parse(argv[4], argv[3], false); // Second command
+    cmd->parse[0] = init_parse(argv[1], argv[2], true);
+    cmd->parse[1] = init_parse(argv[4], argv[3], false);
     cmd->fd_in = argv[1];
     cmd->fd_out = argv[4];
-
-    // Open input and output files
     int in_fd = ft_in_out(cmd->fd_in, 0);
     int out_fd = ft_in_out(cmd->fd_out, 1);
-
-    // Redirect stdin and stdout
     dup2(in_fd, STDIN_FILENO);
     dup2(out_fd, STDOUT_FILENO);
-
-    // Close file descriptors
+    pipe_and_fork(cmd, envp);
     close(in_fd);
     close(out_fd);
 
-    // Execute pipe and fork logic
-    pipe_and_fork(cmd);
-
-    // Free resources
     free(cmd->parse[0]);
     free(cmd->parse[1]);
     free(cmd);
