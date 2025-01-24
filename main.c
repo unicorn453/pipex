@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:57:00 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/24 16:58:07 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/24 18:24:02 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,11 +142,12 @@ t_parse *init_parse(char *file, char *commands, bool input)
         perror("malloc");
         exit(1);
     }
+
     parse->input = input;
     parse->file = ft_strdup(file);
     if (!parse->file)
     {
-        perror("ft_strdup");
+        perror("strdup");
         free(parse);
         exit(1);
     }
@@ -160,20 +161,33 @@ t_parse *init_parse(char *file, char *commands, bool input)
     }
 
     parse->cmd = ft_strdup(str[0]);
-    parse->args = str;
     if (!parse->cmd)
     {
-        perror("ft_strdup");
+        perror("strdup");
         free(parse);
         exit(1);
     }
-    parse->option = (str[1]) ? ft_strdup(str[1]) : NULL;
-    // printf("option: %s\n", parse->option);
-    parse->pattern = (str[2]) ? ft_strdup(str[2]) : NULL;
-    // printf("pattern: %s\n", parse->pattern);
+int num_tokens = 0;
+    for (int i = 0; str[i]; i++)
+    {
+        num_tokens++;
+    }
+parse->args = malloc(sizeof(char *) * (num_tokens + 1));
+for(int i = 0; str[i]; i++)
+{
+    parse->args[i] = ft_strdup(str[i]);
+    if (!parse->args[i])
+    {
+        perror("strdup");
+        free(parse);
+        exit(1);
+    }
+}
+parse->args[num_tokens] = NULL;
 
     return parse;
 }
+
 
 void pipe_and_fork(t_cmd *cmd, char **envp)
 {
