@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 11:26:18 by kruseva           #+#    #+#             */
-/*   Updated: 2024/11/14 15:37:37 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/24 16:11:49 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,18 +29,6 @@ int	ft_putstr(char *s)
 		count++;
 	}
 	return (count);
-}
-
-size_t	ft_strlen(const char *str)
-{
-	size_t	i;
-
-	i = 0;
-	while (str[i])
-	{
-		i++;
-	}
-	return (i);
 }
 
 int	get_hex_length_ptr(unsigned long long num)

@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 22:56:27 by kruseva           #+#    #+#             */
-/*   Updated: 2024/10/17 18:39:56 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/24 16:03:59 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define LIBFT_H
 
 # include <stdlib.h>
+# include "ft_printf/ft_printf.h"
 
 int		ft_isalpha(int c);
 int		ft_isdigit(int c);

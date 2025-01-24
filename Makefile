@@ -5,17 +5,17 @@ NAME = pipex
 
 SRCS = main.c
 
-
-LIBFT = libft/libft.a
 LIBFT_DIR = libft
+LIBFT = $(LIBFT_DIR)/libft.a
+FT_PRINTF = $(LIBFT_DIR)/ft_printf/ft_printf.a
 
 OBJ = $(SRCS:.c=.o)
 
 %.o: %.c
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-$(NAME): $(OBJ) $(LIBFT)
-	$(CC) $(CC_FLAGS) $(OBJ) $(LIBFT) -o $(NAME)
+$(NAME): $(OBJ) $(LIBFT) $(FT_PRINTF)
+	$(CC) $(CC_FLAGS) $(OBJ) $(LIBFT) $(FT_PRINTF) -o $(NAME)
 
 $(LIBFT):
 	make -C $(LIBFT_DIR)

@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:57:00 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/23 21:09:21 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/24 16:58:07 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,13 +30,19 @@ typedef struct s_cmd
     char **envp;
 } t_cmd;
 
+int exec_permissions_added(char *path)
+{
+    int acc = access(path, X_OK);
+    if (acc == 0)
+        return 1;
+    return 0;
+}
 
 char *find_command_path(char *cmd, char **envp)
 {
     char *path_env = NULL;
     char **paths = NULL;
     char *full_path = NULL;
-    struct stat sb;
     int i = 0;
 
     while (envp[i])
@@ -78,7 +84,8 @@ char *find_command_path(char *cmd, char **envp)
             exit(1);
         }
 
-        if (stat(full_path, &sb) == 0 && (sb.st_mode & S_IXUSR))
+
+        if (exec_permissions_added(full_path) == 1)
         {
             for (int j = 0; paths[j]; j++)
                 free(paths[j]);
@@ -96,6 +103,7 @@ char *find_command_path(char *cmd, char **envp)
 
     return NULL;
 }
+
 
 
 int ft_in_out(char *file, int mode)
@@ -160,20 +168,22 @@ t_parse *init_parse(char *file, char *commands, bool input)
         exit(1);
     }
     parse->option = (str[1]) ? ft_strdup(str[1]) : NULL;
+    // printf("option: %s\n", parse->option);
     parse->pattern = (str[2]) ? ft_strdup(str[2]) : NULL;
+    // printf("pattern: %s\n", parse->pattern);
 
     return parse;
 }
 
 void pipe_and_fork(t_cmd *cmd, char **envp)
 {
+    char *cmd_path = NULL;
     int pipefd[2];
     if (pipe(pipefd) == -1)
     {
         perror("pipe");
         exit(EXIT_FAILURE);
     }
-
     pid_t pid = fork();
     if (pid == -1)
     {
@@ -187,10 +197,10 @@ void pipe_and_fork(t_cmd *cmd, char **envp)
         close(pipefd[0]);
         close(pipefd[1]);
 
-        char *cmd_path = find_command_path(cmd->parse[0]->cmd, envp);
+       cmd_path = find_command_path(cmd->parse[0]->cmd, envp);
         if (!cmd_path)
         {
-            fprintf(stderr, "Command not found: %s\n", cmd->parse[0]->cmd);
+            perror("Command not found");
             exit(1);
         }
 
@@ -207,13 +217,12 @@ void pipe_and_fork(t_cmd *cmd, char **envp)
 
         waitpid(pid, NULL, 0);
 
-        char *cmd_path = find_command_path(cmd->parse[1]->cmd, envp);
+        cmd_path = find_command_path(cmd->parse[1]->cmd, envp);
         if (!cmd_path)
         {
-            fprintf(stderr, "Command not found: %s\n", cmd->parse[1]->cmd);
+            perror("Command not found");
             exit(1);
         }
-
         execve(cmd_path, cmd->parse[1]->args, envp);
         perror("execve");
         free(cmd_path);
@@ -226,10 +235,9 @@ int main(int argc, char **argv, char **envp)
 {
     if (argc != 5)
     {
-        fprintf(stderr, "Usage: %s infile 'cmd1 args' 'cmd2 args' outfile\n", argv[0]);
+        ft_printf( "Usage: %s infile 'cmd1 args' 'cmd2 args' outfile\n", argv[0]);
         exit(1);
     }
-
     t_cmd *cmd = malloc(sizeof(t_cmd));
     if (!cmd)
     {
