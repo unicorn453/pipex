@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 19:09:48 by kruseva           #+#    #+#             */
-/*   Updated: 2024/10/17 20:52:44 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/25 18:12:19 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 static int	is_non_ascii(unsigned char c1, unsigned char c2)
 {
-	if ((c1 > 127 || c1 < 0) && (c2 > 127 || c2 < 0))
+	if (c1 > 127 || c2 > 127)
 		return (1);
 	return (0);
 }

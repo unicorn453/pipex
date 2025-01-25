@@ -1,40 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:57:00 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/24 18:24:02 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/25 20:47:55 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
+#include <errno.h>
 
-typedef struct s_parse
+void error(void)
 {
-    bool input;
-    char *file;
-    char *cmd;
-    char *option;
-    char *pattern;
-    char **args;
-} t_parse;
-
-typedef struct s_cmd
-{
-    t_parse *parse[2];
-    char *fd_in;
-    char *fd_out;
-    char **envp;
-} t_cmd;
-
+    // perror("\033[31mError");
+    strerror(errno);
+    exit(EXIT_FAILURE);
+}
 int exec_permissions_added(char *path)
 {
     int acc = access(path, X_OK);
     if (acc == 0)
+    {
+        unlink(path);
         return 1;
+    }
     return 0;
 }
 
@@ -61,7 +53,8 @@ char *find_command_path(char *cmd, char **envp)
     paths = ft_split(path_env, ':');
     if (!paths)
     {
-        perror("ft_split");
+        // perror("ft_split");
+
         exit(1);
     }
 
@@ -70,7 +63,9 @@ char *find_command_path(char *cmd, char **envp)
         full_path = ft_strjoin(paths[i], "/");
         if (!full_path)
         {
-            perror("ft_strjoin");
+            free(paths);
+            // perror("ft_strjoin");
+
             exit(1);
         }
 
@@ -80,10 +75,11 @@ char *find_command_path(char *cmd, char **envp)
 
         if (!full_path)
         {
-            perror("ft_strjoin");
+            free(paths);
+            // perror("ft_strjoin");
+
             exit(1);
         }
-
 
         if (exec_permissions_added(full_path) == 1)
         {
@@ -104,8 +100,6 @@ char *find_command_path(char *cmd, char **envp)
     return NULL;
 }
 
-
-
 int ft_in_out(char *file, int mode)
 {
     int fd;
@@ -114,8 +108,9 @@ int ft_in_out(char *file, int mode)
         fd = open(file, O_RDONLY);
         if (fd < 0)
         {
-            perror("open");
-            exit(1);
+            // perror("open");
+
+            return -1;
         }
     }
     else if (mode == 1)
@@ -123,8 +118,9 @@ int ft_in_out(char *file, int mode)
         fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
         if (fd < 0)
         {
-            perror("open");
-            exit(1);
+            // perror("open");
+
+            return -1;
         }
     }
     else
@@ -134,94 +130,47 @@ int ft_in_out(char *file, int mode)
     return fd;
 }
 
-t_parse *init_parse(char *file, char *commands, bool input)
-{
-    t_parse *parse = malloc(sizeof(t_parse));
-    if (!parse)
-    {
-        perror("malloc");
-        exit(1);
-    }
-
-    parse->input = input;
-    parse->file = ft_strdup(file);
-    if (!parse->file)
-    {
-        perror("strdup");
-        free(parse);
-        exit(1);
-    }
-
-    char **str = ft_split(commands, ' ');
-    if (!str)
-    {
-        perror("ft_split");
-        free(parse);
-        exit(1);
-    }
-
-    parse->cmd = ft_strdup(str[0]);
-    if (!parse->cmd)
-    {
-        perror("strdup");
-        free(parse);
-        exit(1);
-    }
-int num_tokens = 0;
-    for (int i = 0; str[i]; i++)
-    {
-        num_tokens++;
-    }
-parse->args = malloc(sizeof(char *) * (num_tokens + 1));
-for(int i = 0; str[i]; i++)
-{
-    parse->args[i] = ft_strdup(str[i]);
-    if (!parse->args[i])
-    {
-        perror("strdup");
-        free(parse);
-        exit(1);
-    }
-}
-parse->args[num_tokens] = NULL;
-
-    return parse;
-}
-
-
 void pipe_and_fork(t_cmd *cmd, char **envp)
 {
     char *cmd_path = NULL;
     int pipefd[2];
     if (pipe(pipefd) == -1)
     {
-        perror("pipe");
-        exit(EXIT_FAILURE);
+        // perror("pipe");
+
+        error();
     }
     pid_t pid = fork();
     if (pid == -1)
     {
-        perror("fork");
-        exit(EXIT_FAILURE);
+        // perror("fork");
+
+        error();
     }
 
-    if (pid == 0) 
+    if (pid == 0)
     {
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[0]);
         close(pipefd[1]);
 
-       cmd_path = find_command_path(cmd->parse[0]->cmd, envp);
+        cmd_path = find_command_path(cmd->parse[0]->cmd, envp);
         if (!cmd_path)
         {
-            perror("Command not found");
-            exit(1);
+            // perror("Command not found");
+            //
+            error();
         }
 
-        execve(cmd_path, cmd->parse[0]->args, envp);
-        perror("execve");
+        if (execve(cmd_path, cmd->parse[0]->args, envp) == -1)
+        {
+
+            error();
+        }
+        // perror("execve");
+
         free(cmd_path);
-        exit(EXIT_FAILURE);
+        error();
     }
     else
     {
@@ -234,29 +183,35 @@ void pipe_and_fork(t_cmd *cmd, char **envp)
         cmd_path = find_command_path(cmd->parse[1]->cmd, envp);
         if (!cmd_path)
         {
-            perror("Command not found");
-            exit(1);
+            // printf("Command not found: %s\n", cmd->parse[1]->cmd);
+            // ft_printf("Command not found", strerror(errno));
+
+            error();
         }
         execve(cmd_path, cmd->parse[1]->args, envp);
-        perror("execve");
+        // perror("execve");
+
         free(cmd_path);
-        exit(EXIT_FAILURE);
+        // printf("Error: %s\n", strerror(errno));
+
+        error();
     }
 }
-
 
 int main(int argc, char **argv, char **envp)
 {
     if (argc != 5)
     {
-        ft_printf( "Usage: %s infile 'cmd1 args' 'cmd2 args' outfile\n", argv[0]);
-        exit(1);
+        // perror("Usage: ./pipex file1 cmd1 cmd2 file2");
+
+        error();
     }
     t_cmd *cmd = malloc(sizeof(t_cmd));
     if (!cmd)
     {
-        perror("malloc");
-        exit(1);
+        // perror("malloc");
+
+        error();
     }
 
     cmd->parse[0] = init_parse(argv[1], argv[2], true);
@@ -264,7 +219,23 @@ int main(int argc, char **argv, char **envp)
     cmd->fd_in = argv[1];
     cmd->fd_out = argv[4];
     int in_fd = ft_in_out(cmd->fd_in, 0);
+    if (in_fd == -1)
+    {
+        free(cmd->parse[0]);
+        free(cmd->parse[1]);
+        free(cmd);
+
+        error();
+    }
     int out_fd = ft_in_out(cmd->fd_out, 1);
+    if (out_fd == -1)
+    {
+        free(cmd->parse[0]);
+        free(cmd->parse[1]);
+        free(cmd);
+
+        error();
+    }
     dup2(in_fd, STDIN_FILENO);
     dup2(out_fd, STDOUT_FILENO);
     pipe_and_fork(cmd, envp);

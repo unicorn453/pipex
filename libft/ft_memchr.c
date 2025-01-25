@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 20:43:10 by kruseva           #+#    #+#             */
-/*   Updated: 2024/10/17 20:43:17 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/25 18:12:57 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,9 @@ void	*ft_memchr(const void *s, int c, size_t n)
 	char	to_find;
 	char	*str;
 	char	*found;
-	size_t	string_len;
 
 	to_find = c;
 	str = (char *)s;
-	string_len = sizeof(str);
 	i = 0;
 	while (i < n)
 	{

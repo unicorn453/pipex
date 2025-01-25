@@ -1,9 +1,9 @@
 CC = cc
-CC_FLAGS = -Wall -Wextra -Werror
+CC_FLAGS = -Wall -Wextra -Werror -g
 
 NAME = pipex
 
-SRCS = main.c
+SRCS = pipex.c input_parsing.c
 
 LIBFT_DIR = libft
 LIBFT = $(LIBFT_DIR)/libft.a
