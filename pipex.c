@@ -125,60 +125,45 @@ int	ft_in_out(char *file, int mode)
 
 void	pipe_and_fork(t_cmd *cmd, char **envp)
 {
-	char	*cmd_path;
 	int		pipefd[2];
-	pid_t	pid;
+	char	*cmd1_path;
+	char	*cmd2_path;
 
-	cmd_path = NULL;
+	pid_t pid1, pid2;
 	if (pipe(pipefd) == -1)
-	{
-		// perror("pipe");
 		error();
-	}
-	pid = fork();
-	if (pid == -1)
-	{
-		// perror("fork");
+	pid1 = fork();
+	if (pid1 == -1)
 		error();
-	}
-	if (pid == 0)
+	if (pid1 == 0)
 	{
 		dup2(pipefd[1], STDOUT_FILENO);
 		close(pipefd[0]);
 		close(pipefd[1]);
-		// Find the command path
-		cmd_path = find_command_path(cmd->parse[0]->cmd, envp);
-		if (!cmd_path)
-		{
+		cmd1_path = find_command_path(cmd->parse[0]->cmd, envp);
+		if (!cmd1_path)
 			error();
-		}
-		if (execve(cmd_path, cmd->parse[0]->args, envp) == -1)
-		{
-			free(cmd_path);
+		if (execve(cmd1_path, cmd->parse[0]->args, envp) == -1)
 			error();
-		}
-		free(cmd_path);
-		error();
 	}
-	else
+	pid2 = fork();
+	if (pid2 == -1)
+		error();
+	if (pid2 == 0)
 	{
 		dup2(pipefd[0], STDIN_FILENO);
-		close(pipefd[0]);
 		close(pipefd[1]);
-		waitpid(pid, NULL, 0);
-		cmd_path = find_command_path(cmd->parse[1]->cmd, envp);
-		if (!cmd_path)
-		{
+		close(pipefd[0]);
+		cmd2_path = find_command_path(cmd->parse[1]->cmd, envp);
+		if (!cmd2_path)
 			error();
-		}
-		if (execve(cmd_path, cmd->parse[1]->args, envp) == -1)
-		{
-			free(cmd_path);
+		if (execve(cmd2_path, cmd->parse[1]->args, envp) == -1)
 			error();
-		}
-		free(cmd_path);
-		error();
 	}
+	close(pipefd[0]);
+	close(pipefd[1]);
+	waitpid(pid1, NULL, 0);
+	waitpid(pid2, NULL, 0);
 }
 
 int	main(int argc, char **argv, char **envp)
