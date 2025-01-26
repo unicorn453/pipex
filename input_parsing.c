@@ -19,16 +19,6 @@ void	perror_exit(void)
 	exit(EXIT_FAILURE);
 }
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
 char **split_commands(const char *command)
 {
     char **args;
@@ -37,11 +27,11 @@ char **split_commands(const char *command)
     int token_index = 0;
     bool in_single_quote = false;
     bool in_double_quote = false;
-    bool in_escaped = false; // To track escape sequences
+    bool in_escaped = false;
     char c;
 
-    args = malloc(1024 * sizeof(char *));  // Allocate memory for tokens
-    token = malloc(1024);  // Allocate memory for a single token
+    args = malloc(1024 * sizeof(char *));
+    token = malloc(1024);
     if (!args || !token) {
         perror("malloc");
         exit(EXIT_FAILURE);
