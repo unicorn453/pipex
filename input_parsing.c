@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/25 17:34:31 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/25 20:33:21 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/27 20:40:16 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,67 +19,88 @@ void	perror_exit(void)
 	exit(EXIT_FAILURE);
 }
 
+bool *process_char(char c, const char *command, int *i, char *token, int *token_index)
+{
+    static bool checks[3] = {false, false, false};
+
+    if (c == '\\' && (command[*i + 1] == '"' || command[*i + 1] == '\'')) {
+        checks[2] = true;
+        (*i)++;
+        token[(*token_index)++] = command[*i];
+        return checks;
+    }
+
+    if ((c == '\'' || c == '"') && checks[2]) {
+        checks[2] = false;
+        return checks;
+    }
+
+    if (c == '\'' && !checks[1] && !checks[2]) {
+        checks[0] = !checks[0];
+        return checks;
+    }
+
+    if (c == '"' && !checks[0] && !checks[2]) {
+        checks[1] = !checks[1];
+        return checks;
+    }
+
+    if (c == ' ' && !checks[0] && !checks[1] && !checks[2]) {
+        return checks;
+    }
+
+    token[(*token_index)++] = c;
+    checks[2] = false;
+    return checks;
+}
+
+char **split_commands(const char *command);
+char **allocate_args_and_token();
+void free_args_and_token(char **args, char *token);
+void add_token_to_args(char **args, char *token, int *arg_index, int *token_index);
+
+ void parse_command(const char *command, char **args, char *token, int *arg_index, int *token_index)
+    {
+        bool checks[3] = {false, false, false};
+        char c;
+        int i = 0;
+        while (command[i] != '\0') {
+            c = command[i];
+           bool *temp_checks = process_char(c, command, &i, token, token_index);
+           for (int j = 0; j < 3; j++) {
+               checks[j] = temp_checks[j];
+           }
+
+            if (c == ' ' && !checks[0] && !checks[1] && !checks[2]) {
+            if (*token_index > 0) { 
+                add_token_to_args(args, token, arg_index, token_index);
+            }
+            }
+            i++;
+        }
+    }
+
+
 char **split_commands(const char *command)
 {
     char **args;
     char *token;
     int arg_index = 0;
     int token_index = 0;
-    bool in_single_quote = false;
-    bool in_double_quote = false;
-    bool in_escaped = false;
-    char c;
+    // bool checks[3] = {false, false, false};
 
-    args = malloc(1024 * sizeof(char *));
-    token = malloc(1024);
+    args = allocate_args_and_token(&token);
     if (!args || !token) {
         perror("malloc");
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; command[i] != '\0'; i++) {
-        c = command[i];
+//    parse_command(command, args, token, &arg_index, &token_index, checks);
 
-    
-        if (c == '\\' && (command[i + 1] == '"' || command[i + 1] == '\'')) {
-            in_escaped = true;
-            i++;
-            token[token_index++] = command[i];
-            continue;
-        }
-
-        if ((c == '\'' || c == '"') && in_escaped) {
-            in_escaped = false;
-            continue;
-        }
-
-        if (c == '\'' && !in_double_quote && !in_escaped) {
-            in_single_quote = !in_single_quote;
-            continue;
-        }
-
-        if (c == '"' && !in_single_quote && !in_escaped) {
-            in_double_quote = !in_double_quote;
-            continue;
-        }
-
-        if (c == ' ' && !in_single_quote && !in_double_quote && !in_escaped) {
-            if (token_index > 0) { 
-                token[token_index] = '\0';
-                args[arg_index++] = strdup(token); 
-                token_index = 0;
-            }
-            continue;
-        }
-
-        token[token_index++] = c;
-
-        in_escaped = false;
-    }
+parse_command(command, args, token, &arg_index, &token_index);
 
     if (token_index > 0) {
-        token[token_index] = '\0';
-        args[arg_index++] = strdup(token);
+        add_token_to_args(args, token, &arg_index, &token_index);
     }
 
     args[arg_index] = NULL;
@@ -89,6 +110,19 @@ char **split_commands(const char *command)
     return args;
 }
 
+char **allocate_args_and_token(char **token)
+{
+    char **args = malloc(1024 * sizeof(char *));
+    *token = malloc(1024);
+    return args;
+}
+
+void add_token_to_args(char **args, char *token, int *arg_index, int *token_index)
+{
+    token[*token_index] = '\0';
+    args[(*arg_index)++] = strdup(token);
+    *token_index = 0;
+}
 
 
 
