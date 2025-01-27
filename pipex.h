@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:59:21 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/25 20:37:05 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/27 23:18:36 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,5 +42,22 @@ typedef struct s_cmd
 	char	**envp;
 }			t_cmd;
 
+typedef struct s_parser
+{
+	const char	*command;
+	char		c;
+	int			i;
+	char		*token;
+	int			token_index;
+	char		**args;
+	int			arg_index;
+	bool		checks[3];
+}				t_parser;
+
 t_parse		*init_parse(char *file, char *commands, bool input);
 void		error(void);
+char	**split_commands(const char *command);
+char	**allocate_args_and_token(char **token);
+void	free_args_and_token(char **args, char *token);
+void	add_token_to_args(char **args, char *token, int *arg_index,
+			int *token_index);
