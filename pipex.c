@@ -6,92 +6,11 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:57:00 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/28 15:59:40 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/28 16:16:03 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
-
-t_pid	*initialize_pid(void)
-{
-	t_pid	*pid_info;
-
-	pid_info = malloc(sizeof(t_pid));
-	if (!pid_info)
-		error();
-	pid_info->pid1 = 0;
-	pid_info->pid2 = 0;
-	pid_info->cmd1_path = NULL;
-	pid_info->cmd2_path = NULL;
-	pid_info->status1 = 0;
-	pid_info->status2 = 0;
-	return (pid_info);
-}
-
-t_path	*initialize_path(void)
-{
-	t_path	*path;
-
-	path = malloc(sizeof(t_path));
-	if (!path)
-		error();
-	path->path_env = NULL;
-	path->paths = NULL;
-	path->full_path = NULL;
-	path->i = 0;
-	path->temp = NULL;
-	return (path);
-}
-
-void	error(void)
-{
-	strerror(errno);
-	exit(EXIT_FAILURE);
-}
-
-void	free_paths(t_path *path, int error_bool)
-{
-	int	j;
-
-	j = 0;
-	while (path->paths[j])
-	{
-		free(path->paths[j]);
-		j++;
-	}
-	free(path->paths);
-	if (error_bool)
-		error();
-}
-
-char	*add_permission_free_path(t_path *path, char *cmd)
-{
-	path->i = 0;
-	while (path->paths[path->i])
-	{
-		path->temp = ft_strjoin(path->paths[path->i], "/");
-		if (!path->temp)
-		{
-			free_paths(path, 1);
-		}
-		path->full_path = ft_strjoin(path->temp, cmd);
-		free(path->temp);
-		if (!path->full_path)
-		{
-			free_paths(path, 1);
-		}
-		if (access(path->full_path, X_OK) == 0)
-		{
-			free_paths(path, 0);
-			return (path->full_path);
-		}
-		unlink(path->full_path);
-		free(path->full_path);
-		path->full_path = NULL;
-		path->i++;
-	}
-	return (NULL);
-}
 
 char	*find_command_path(char *cmd, char **envp)
 {
@@ -197,15 +116,6 @@ void	pipe_and_fork(t_cmd *cmd, char **envp)
 		exit(WEXITSTATUS(pid_info->status2));
 	else
 		exit(EXIT_SUCCESS);
-}
-
-void	free_cmd_err(t_cmd *cmd, int error_bool)
-{
-	free(cmd->parse[0]);
-	free(cmd->parse[1]);
-	free(cmd);
-	if (error_bool)
-		error();
 }
 
 int	main(int argc, char **argv, char **envp)

@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 14:19:34 by kruseva           #+#    #+#             */
-/*   Updated: 2024/11/27 13:57:21 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/28 16:05:41 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,76 +104,4 @@ char	*get_next_line(int fd)
 	}
 	free(buffer);
 	return (get_line(&saved[fd]));
-}
-
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "get_next_line_bonus.h"
-
-int main(void)
-{
-    int fd1, fd2, fd3;
-    char *line1, *line2, *line3;
-
-    // Open the files for reading
-    fd1 = open("proba.txt", O_RDONLY);
-    fd2 = open("proba1.txt", O_RDONLY);
-    fd3 = open("variable_nls.txt", O_RDONLY);
-
-    // Check if files are successfully opened
-    if (fd1 < 0 || fd2 < 0 || fd3 < 0)
-    {
-        perror("Error opening file");
-        if (fd1 >= 0) close(fd1);
-        if (fd2 >= 0) close(fd2);
-        if (fd3 >= 0) close(fd3);
-        return 1;
-    }
-
-    // Read and display lines from the files interleaved
-    printf("Reading lines from multiple file descriptors:\n");
-    for (size_t i = 0; i < 6; i++) // Adjust number of iterations as needed
-    {
-        line1 = get_next_line(fd1);
-        if (line1)
-        {
-            printf("fd1: %s\n", line1); // Add newline character
-            free(line1);
-        }
-        else
-        {
-            printf("fd1: (null)\n");
-        }
-
-        line2 = get_next_line(fd2);
-        if (line2)
-        {
-            printf("fd2: %s\n", line2); // Add newline character
-            free(line2);
-        }
-        else
-        {
-            printf("fd2: (null)\n");
-        }
-
-        line3 = get_next_line(fd3);
-        if (line3)
-        {
-            printf("fd3: %s\n", line3); // Add newline character
-            free(line3);
-        }
-        else
-        {
-            printf("fd3: (null)\n");
-        }
-    }
-
-    // Close the files
-    close(fd1);
-    close(fd2);
-    close(fd3);
-
-    return 0;
 }

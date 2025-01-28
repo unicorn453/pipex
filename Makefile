@@ -3,7 +3,10 @@ CC_FLAGS = -Wall -Wextra -Werror -g
 
 NAME = pipex
 
-SRCS = pipex.c input_parsing.c
+SRCS = pipex.c input_parsing.c \
+		init_stacks_free.c \
+		free_err_functions.c \
+		input_parsing_helper.c \
 
 LIBFT_DIR = libft
 LIBFT = $(LIBFT_DIR)/libft.a
