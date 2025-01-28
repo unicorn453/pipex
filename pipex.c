@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:57:00 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/28 16:16:03 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/28 20:04:44 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ char	*find_command_path(char *cmd, char **envp)
 		return (path->full_path);
 	free_paths(path, 0);
 	free(path);
-	fprintf(stderr, "Command not found: %s\n", cmd);
 	return (NULL);
 }
 
@@ -66,7 +65,7 @@ int	ft_in_out(char *file, int mode)
 
 void	exec_cmd(t_cmd *cmd, char **envp, int *pipefd, t_pid *pid_info)
 {
-	if (pid_info->pid1 == 0)
+	if (pid_info->pid1 == 0 && cmd->in_fd != -1)
 	{
 		dup2(pipefd[1], STDOUT_FILENO);
 		close(pipefd[0]);
@@ -114,33 +113,40 @@ void	pipe_and_fork(t_cmd *cmd, char **envp)
 	else if (WIFEXITED(pid_info->status2)
 		&& WEXITSTATUS(pid_info->status2) != 0)
 		exit(WEXITSTATUS(pid_info->status2));
-	else
-		exit(EXIT_SUCCESS);
 }
 
-int	main(int argc, char **argv, char **envp)
-{
-	t_cmd	*cmd;
-	int		in_fd;
-	int		out_fd;
 
-	if (argc != 5)
-		error();
-	cmd = malloc(sizeof(t_cmd));
-	if (!cmd)
-		error();
-	cmd->parse[0] = init_parse(argv[1], argv[2], true);
-	cmd->parse[1] = init_parse(argv[4], argv[3], false);
-	cmd->fd_in = argv[1];
-	cmd->fd_out = argv[4];
-	in_fd = ft_in_out(cmd->fd_in, 0);
-	if (in_fd == -1)
-		free_cmd_err(cmd, 1);
-	out_fd = ft_in_out(cmd->fd_out, 1);
-	if (out_fd == -1)
-		free_cmd_err(cmd, 1);
-	dup2(in_fd, STDIN_FILENO);
-	dup2(out_fd, STDOUT_FILENO);
-	pipe_and_fork(cmd, envp);
-	return (close(in_fd), close(out_fd), free_cmd_err(cmd, 0), 0);
+int main(int argc, char **argv, char **envp)
+{
+    t_cmd *cmd;
+    int in_fd;
+    int out_fd;
+
+    if (argc != 5)
+        error();
+
+    cmd = malloc(sizeof(t_cmd));
+    if (!cmd)
+        error();
+
+    cmd->parse[0] = init_parse(argv[1], argv[2], true);
+    cmd->parse[1] = init_parse(argv[4], argv[3], false);
+    cmd->fd_in = argv[1];
+    cmd->fd_out = argv[4];
+
+    in_fd = ft_in_out(cmd->fd_in, 0);
+    if (in_fd == -1)
+        perror("\033[31mError");
+    cmd->in_fd = in_fd;
+
+    out_fd = ft_in_out(cmd->fd_out, 1);
+    if (out_fd == -1)
+        free_cmd_err(cmd, 1);
+    dup2(in_fd, STDIN_FILENO);
+    dup2(out_fd, STDOUT_FILENO);
+    close(in_fd);
+    close(out_fd);
+    pipe_and_fork(cmd, envp);
+
+    return (close(in_fd), close(out_fd), free_cmd_err(cmd, 0), 0);
 }

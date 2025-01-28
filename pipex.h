@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:59:21 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/28 16:25:48 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/28 19:31:34 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ typedef struct s_cmd
 	char		*fd_in;
 	char		*fd_out;
 	char		**envp;
+	int in_fd;
 }				t_cmd;
 
 typedef struct s_parser

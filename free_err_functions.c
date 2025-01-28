@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 16:13:25 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/28 16:16:25 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/28 18:28:18 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,6 @@ void	perror_exit(t_parse *parse)
 
 void	error(void)
 {
-	strerror(errno);
+	perror("\033[31mError");
 	exit(EXIT_FAILURE);
 }
