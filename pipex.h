@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:59:21 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/27 23:18:36 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/28 15:53:06 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,23 @@ typedef struct s_parser
 	int			arg_index;
 	bool		checks[3];
 }				t_parser;
+
+typedef struct s_pid{
+	pid_t	pid1;
+	pid_t	pid2;
+	char	*cmd1_path;
+	char	*cmd2_path;
+	int status1;
+	int status2;
+	} t_pid;
+
+typedef struct s_path{
+	char	*path_env;
+	char	**paths;
+	char	*full_path;
+	int		i;
+	char	*temp;
+} t_path;
 
 t_parse		*init_parse(char *file, char *commands, bool input);
 void		error(void);
