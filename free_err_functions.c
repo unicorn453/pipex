@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 16:13:25 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/28 18:28:18 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/29 17:34:44 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,11 +41,18 @@ char	*add_permission_free_path(t_path *path, char *cmd)
 	return (NULL);
 }
 
-void	free_cmd_err(t_cmd *cmd, int error_bool)
+void	free_cmd_err(t_cmd *cmd, t_pid *pid_info, int error_bool)
 {
-	free(cmd->parse[0]);
-	free(cmd->parse[1]);
-	free(cmd);
+	if (pid_info)
+		free(pid_info);
+	if (cmd)
+	{
+		if (cmd->parse[0])
+			free(cmd->parse[0]);
+		if (cmd->parse[1])
+			free(cmd->parse[1]);
+		free(cmd);
+	}
 	if (error_bool)
 		error();
 }
