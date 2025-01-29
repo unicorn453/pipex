@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 16:06:40 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/28 16:26:34 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/29 15:08:13 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ t_pid	*initialize_pid(void)
 	pid_info = malloc(sizeof(t_pid));
 	if (!pid_info)
 		error();
-	pid_info->pid1 = 0;
-	pid_info->pid2 = 0;
+	pid_info->pid1 = -1;
+	pid_info->pid2 = -1;
 	pid_info->cmd1_path = NULL;
 	pid_info->cmd2_path = NULL;
 	pid_info->status1 = 0;
