@@ -47,6 +47,18 @@ void	free_cmd_err(t_cmd *cmd, t_pid *pid_info, int error_bool)
 		free(pid_info);
 	if (cmd)
 	{
+		if (cmd->parse[0]->args)
+			free_args(cmd->parse[0]->args);
+		if (cmd->parse[1]->args)
+			free_args(cmd->parse[1]->args);
+		if (cmd->parse[0]->cmd)
+			free(cmd->parse[0]->cmd);
+		if (cmd->parse[1]->cmd)
+			free(cmd->parse[1]->cmd);
+		if (cmd->parse[0]->file)
+			free(cmd->parse[0]->file);
+		if (cmd->parse[1]->file)
+			free(cmd->parse[1]->file);
 		if (cmd->parse[0])
 			free(cmd->parse[0]);
 		if (cmd->parse[1])

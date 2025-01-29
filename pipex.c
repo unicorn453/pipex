@@ -145,10 +145,35 @@ t_cmd	*init_cmd(char **argv)
 	return (cmd);
 }
 
+int	exit_status(int status1, int status2)
+{
+	int	exit_status1;
+	int	exit_status2;
+
+	if (WIFEXITED(status1))
+		exit_status1 = WEXITSTATUS(status1);
+	else
+		exit_status1 = 0;
+	if (WIFEXITED(status2))
+		exit_status2 = WEXITSTATUS(status2);
+	else
+		exit_status2 = 0;
+	if (exit_status1 != 0 && exit_status2 != 0)
+	{
+		return (exit_status1);
+	}
+	if (exit_status1 != 0)
+		return (exit_status1);
+	if (exit_status2 != 0)
+		return (exit_status2);
+	return (0);
+}
+
 int	main(int argc, char **argv, char **envp)
 {
 	t_cmd	*cmd;
 	t_pid	*pid_info;
+	int		exit_stat;
 
 	if (argc != 5)
 		error();
@@ -166,10 +191,9 @@ int	main(int argc, char **argv, char **envp)
 	}
 	waitpid(pid_info->pid1, &pid_info->status1, 0);
 	waitpid(pid_info->pid2, &pid_info->status2, 0);
+	exit_stat = exit_status(pid_info->status1, pid_info->status2);
 	free_cmd_err(cmd, pid_info, 0);
-	if (WIFEXITED(pid_info->status1) && WEXITSTATUS(pid_info->status1) != 0)
-		exit(WEXITSTATUS(pid_info->status1));
-	if (WIFEXITED(pid_info->status2) && WEXITSTATUS(pid_info->status2) != 0)
-		exit(WEXITSTATUS(pid_info->status2));
+	if (exit_stat)
+		return (exit_stat);
 	return (0);
 }

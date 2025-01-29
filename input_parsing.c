@@ -92,6 +92,7 @@ t_parse	*init_parse(char *file, char *commands, bool input)
 	if (!parse->cmd)
 	{
 		free_args(parse->args);
+		free(parse->cmd);
 		free(parse->file);
 		perror_exit(parse);
 	}
