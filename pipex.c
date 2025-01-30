@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:57:00 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/29 17:40:54 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/30 17:32:08 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ int	child_proc_one(t_cmd *cmd, char **envp, int *pipefd, t_pid *pid_info)
 {
 	if (cmd->in_fd == -1)
 	{
+		free_cmd_err(cmd, pid_info, 0);
 		return (exit(0), 0);
 	}
 	dup2(cmd->in_fd, STDIN_FILENO);
@@ -75,9 +76,14 @@ int	child_proc_one(t_cmd *cmd, char **envp, int *pipefd, t_pid *pid_info)
 	close(pipefd[1]);
 	pid_info->cmd1_path = find_command_path(cmd->parse[0]->cmd, envp);
 	if (!pid_info->cmd1_path)
-		error();
+	{
+		free_cmd_err(cmd, pid_info, 0);
+		perror("Error");
+		exit(EXIT_FAILURE);
+	}
 	if (execve(pid_info->cmd1_path, cmd->parse[0]->args, envp) == -1)
 	{
+		free_cmd_err(cmd, pid_info, 0);
 		free(pid_info->cmd1_path);
 		error();
 	}
@@ -97,7 +103,9 @@ int	child_proc_two(t_cmd *cmd, char **envp, int *pipefd, t_pid *pid_info)
 	close(pipefd[0]);
 	pid_info->cmd2_path = find_command_path(cmd->parse[1]->cmd, envp);
 	if (!pid_info->cmd2_path)
+	{
 		error();
+	}
 	if (execve(pid_info->cmd2_path, cmd->parse[1]->args, envp) == -1)
 	{
 		free(pid_info->cmd2_path);

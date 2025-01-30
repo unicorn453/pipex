@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:59:21 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/29 17:36:23 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/30 17:32:21 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ typedef struct s_cmd
 	char		*fd_in;
 	char		*fd_out;
 	char		**envp;
-	int in_fd;
-	int out_fd;
+	int			in_fd;
+	int			out_fd;
 }				t_cmd;
 
 typedef struct s_parser
@@ -86,7 +86,7 @@ void			free_paths(t_path *path, int error_bool);
 void			error(void);
 void			perror_exit(t_parse *parse);
 void			free_args(char **args);
-void	free_cmd_err(t_cmd *cmd, t_pid *pid_info, int error_bool);
+void			free_cmd_err(t_cmd *cmd, t_pid *pid_info, int error_bool);
 char			*add_permission_free_path(t_path *path, char *cmd);
 
 // input_parsing.c
