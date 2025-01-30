@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/25 17:34:31 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/30 16:39:40 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/30 18:58:28 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void	add_token_to_args(char **args, char *token, int *arg_index,
 		int *token_index)
 {
 	token[*token_index] = '\0';
-	args[(*arg_index)++] = strdup(token);
+	args[(*arg_index)++] = ft_strdup(token);
 	*token_index = 0;
 }
 
@@ -79,7 +79,7 @@ t_parse	*init_parse(char *file, char *commands, bool input)
 	if (!parse)
 		error();
 	parse->input = input;
-	parse->file = strdup(file);
+	parse->file = ft_strdup(file);
 	if (!parse->file)
 		perror_exit(parse);
 	parse->args = split_commands(commands);
@@ -88,7 +88,7 @@ t_parse	*init_parse(char *file, char *commands, bool input)
 		free(parse->file);
 		perror_exit(parse);
 	}
-	parse->cmd = strdup(parse->args[0]);
+	parse->cmd = ft_strdup(parse->args[0]);
 	if (!parse->cmd)
 	{
 		free_args(parse->args);

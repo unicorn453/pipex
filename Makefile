@@ -7,6 +7,7 @@ SRCS = pipex.c input_parsing.c \
 		init_stacks_free.c \
 		free_err_functions.c \
 		input_parsing_helper.c \
+		pipe_fork.c \
 
 LIBFT_DIR = libft
 LIBFT = $(LIBFT_DIR)/libft.a

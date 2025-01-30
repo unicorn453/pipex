@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:59:21 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/30 17:32:21 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/30 19:21:57 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,3 +102,10 @@ void			parse_command(t_parser *parser);
 bool			*process_char(t_parser *parser);
 bool			handle_space(char c, bool *checks);
 bool			handle_quotes(char c, bool *checks);
+
+// pipe_fork.c
+int				pipe_and_fork(t_cmd *cmd, char **envp, t_pid *pid_info);
+int				child_proc_two(t_cmd *cmd, char **envp, int *pipefd,
+					t_pid *pid_info);
+int				child_proc_one(t_cmd *cmd, char **envp, int *pipefd,
+					t_pid *pid_info);
