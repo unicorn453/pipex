@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/30 19:20:45 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/30 19:22:26 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/01/30 19:29:25 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,8 @@ int	child_proc_one(t_cmd *cmd, char **envp, int *pipefd, t_pid *pid_info)
 	}
 	if (execve(pid_info->cmd1_path, cmd->parse[0]->args, envp) == -1)
 	{
-		free_cmd_err(cmd, pid_info, 0);
 		free(pid_info->cmd1_path);
+		free_cmd_err(cmd, pid_info, 0);
 		write(2, "command not found\n", 18);
 		exit(EXIT_FAILURE);
 	}
@@ -45,6 +45,7 @@ int	child_proc_two(t_cmd *cmd, char **envp, int *pipefd, t_pid *pid_info)
 {
 	if (cmd->out_fd == -1)
 	{
+		free_cmd_err(cmd, pid_info, 0);
 		return (exit(127), 0);
 	}
 	dup2(cmd->out_fd, STDOUT_FILENO);
@@ -54,12 +55,14 @@ int	child_proc_two(t_cmd *cmd, char **envp, int *pipefd, t_pid *pid_info)
 	pid_info->cmd2_path = find_command_path(cmd->parse[1]->cmd, envp);
 	if (!pid_info->cmd2_path)
 	{
+		free_cmd_err(cmd, pid_info, 0);
 		write(2, "command not found\n", 18);
 		exit(EXIT_FAILURE);
 	}
 	if (execve(pid_info->cmd2_path, cmd->parse[1]->args, envp) == -1)
 	{
 		free(pid_info->cmd2_path);
+		free_cmd_err(cmd, pid_info, 0);
 		write(2, "command not found\n", 18);
 		exit(EXIT_FAILURE);
 	}
