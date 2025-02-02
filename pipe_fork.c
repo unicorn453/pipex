@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/30 19:20:45 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/30 20:30:23 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/02/02 17:43:14 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,8 @@ int	child_proc_one(t_cmd *cmd, char **envp, int *pipefd, t_pid *pid_info)
 {
 	if (cmd->in_fd == -1)
 	{
-		close(pipefd[0]);
-	close(pipefd[1]);
-	close(cmd->out_fd);
-		free_cmd_err(cmd, pid_info, 0);
-		return (exit(0), 0);
+		return (close(pipefd[0]), close(pipefd[1]), close(cmd->out_fd),
+			free_cmd_err(cmd, pid_info, 0), exit(0), 0);
 	}
 	dup2(cmd->in_fd, STDIN_FILENO);
 	dup2(pipefd[1], STDOUT_FILENO);

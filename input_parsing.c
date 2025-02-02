@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/25 17:34:31 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/30 20:32:23 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/02/02 17:41:36 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,25 +79,12 @@ char	**split_commands(const char *command)
 		return (args);
 	parser = initialize_parser(command, args, token);
 	if (!parser)
-	{
-		free(args);
-		return (args = NULL, args);
-	}
+		return (free(token), free(args), args = NULL, args);
 	check = parse_command(parser);
 	if (check == -1)
-	{
-		free(parser);
-		free(token);
-		free_args(args);
-		return (args = NULL, args);
-	}
+		return (free(parser), free(token), free_args(args), args = NULL, args);
 	else if (check == -2)
-	{
-		free(parser);
-		free(args);
-		free(token);
-		return (args = NULL, args);
-	}
+		return (free(parser), free(token), free(args), args = NULL, args);
 	free(token);
 	free(parser);
 	return (args);

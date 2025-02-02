@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 16:13:25 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/30 20:33:03 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/02/02 17:38:47 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,15 +19,12 @@ char	*add_permission_free_path(t_path *path, char *cmd)
 	{
 		path->temp = ft_strjoin(path->paths[path->i], "/");
 		if (!path->temp)
-		{
-			free_paths(path, 1);
-		}
+			return (free_paths(path, 0), path->full_path = NULL,
+				path->full_path);
 		path->full_path = ft_strjoin(path->temp, cmd);
 		free(path->temp);
 		if (!path->full_path)
-		{
-			free_paths(path, 1);
-		}
+			return (free_paths(path, 0), path->full_path);
 		if (access(path->full_path, X_OK) == 0)
 		{
 			free_paths(path, 0);
@@ -72,6 +69,7 @@ void	free_cmd_err(t_cmd *cmd, t_pid *pid_info, int error_bool)
 void	free_args(char **args)
 {
 	int	i;
+
 	i = 0;
 	if (args[i])
 	{

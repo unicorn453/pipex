@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 16:20:18 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/30 16:39:49 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/02/02 17:41:52 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int	parse_command(t_parser *parser)
 		check = add_token_to_args(parser->args, parser->token,
 				&parser->arg_index, &parser->token_index);
 		if (check > 0)
-				return (check);
+			return (check);
 	}
 	parser->args[parser->arg_index] = NULL;
 	return (0);

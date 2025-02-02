@@ -6,7 +6,7 @@
 /*   By: kruseva <kruseva@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 19:57:00 by kruseva           #+#    #+#             */
-/*   Updated: 2025/01/30 20:06:20 by kruseva          ###   ########.fr       */
+/*   Updated: 2025/02/02 17:57:56 by kruseva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,7 @@ char	*find_command_path(char *cmd, char **envp)
 
 	path = initialize_path();
 	if (!path)
-	{
-		ret_str = NULL;
-		return (ret_str);
-	}
+		return (ret_str = NULL, ret_str);
 	path->i = 0;
 	while (envp[path->i])
 	{
@@ -34,25 +31,14 @@ char	*find_command_path(char *cmd, char **envp)
 		path->i++;
 	}
 	if (!path->path_env)
-	{
-		free(path);
-		ret_str = NULL;
-		return (ret_str);
-	}
+		return (free(path), ret_str = NULL, ret_str);
 	path->paths = ft_split(path->path_env, ':');
 	if (!path->paths)
-	{
-		free(path);
-		ret_str = NULL;
-		return (ret_str);
-	}
+		return (free(path), ret_str = NULL, ret_str);
 	path->full_path = add_permission_free_path(path, cmd);
 	if (path->full_path)
 		return (path->full_path);
-	free_paths(path, 0);
-	free(path);
-	ret_str = NULL;
-	return (ret_str);
+	return (free_paths(path, 0), free(path), ret_str = NULL, ret_str);
 }
 
 int	ft_in_out(char *file, int mode)
@@ -137,16 +123,7 @@ int	main(int argc, char **argv, char **envp)
 	}
 	pid_info = initialize_pid();
 	cmd = init_cmd(argv);
-	if (!cmd)
-	{
-		free(pid_info);
-		write(2, "Error: malloc\n", 14);
-		exit(EXIT_FAILURE);
-	}
-	if (cmd->in_fd == -1)
-		perror("\033[31mError");
-	if (cmd->out_fd == -1)
-		free_cmd_err(cmd, pid_info, 1);
+	check_pid_cmd(pid_info, cmd);
 	if (pipe_and_fork(cmd, envp, pid_info) == -1)
 		free_cmd_err(cmd, pid_info, 1);
 	if ((waitpid(pid_info->pid1, &pid_info->status1, 0) == -1)
