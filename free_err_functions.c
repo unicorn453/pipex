@@ -72,12 +72,15 @@ void	free_cmd_err(t_cmd *cmd, t_pid *pid_info, int error_bool)
 void	free_args(char **args)
 {
 	int	i;
-
 	i = 0;
-	while (args[i])
+	if (args[i])
 	{
-		free(args[i]);
-		i++;
+		while (args[i])
+		{
+			if (args[i])
+				free(args[i]);
+			i++;
+		}
 	}
 	free(args);
 }

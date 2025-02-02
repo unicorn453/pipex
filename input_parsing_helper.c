@@ -12,25 +12,33 @@
 
 #include "pipex.h"
 
-void	parse_command(t_parser *parser)
+int	parse_command(t_parser *parser)
 {
+	int	check;
+
+	check = 0;
 	while (parser->command[parser->i] != '\0')
 	{
 		parser->c = parser->command[parser->i];
 		process_char(parser);
 		if (handle_space(parser->c, parser->checks) && parser->token_index > 0)
 		{
-			add_token_to_args(parser->args, parser->token, &parser->arg_index,
-				&parser->token_index);
+			check = add_token_to_args(parser->args, parser->token,
+					&parser->arg_index, &parser->token_index);
+			if (check > 0)
+				return (check);
 		}
 		parser->i++;
 	}
 	if (parser->token_index > 0)
 	{
-		add_token_to_args(parser->args, parser->token, &parser->arg_index,
-			&parser->token_index);
+		check = add_token_to_args(parser->args, parser->token,
+				&parser->arg_index, &parser->token_index);
+		if (check > 0)
+				return (check);
 	}
 	parser->args[parser->arg_index] = NULL;
+	return (0);
 }
 
 bool	*process_char(t_parser *parser)

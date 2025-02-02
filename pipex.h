@@ -93,12 +93,12 @@ char			*add_permission_free_path(t_path *path, char *cmd);
 t_parse			*init_parse(char *file, char *commands, bool input);
 char			**split_commands(const char *command);
 bool			handle_escape(t_parser *parser);
-void			add_token_to_args(char **args, char *token, int *arg_index,
+int				add_token_to_args(char **args, char *token, int *arg_index,
 					int *token_index);
 char			**allocate_args_and_token(char **token);
 
 // input_parsing_helper.c
-void			parse_command(t_parser *parser);
+int				parse_command(t_parser *parser);
 bool			*process_char(t_parser *parser);
 bool			handle_space(char c, bool *checks);
 bool			handle_quotes(char c, bool *checks);

@@ -15,8 +15,14 @@
 char	*find_command_path(char *cmd, char **envp)
 {
 	t_path	*path;
+	char	*ret_str;
 
 	path = initialize_path();
+	if (!path)
+	{
+		ret_str = NULL;
+		return (ret_str);
+	}
 	path->i = 0;
 	while (envp[path->i])
 	{
@@ -28,16 +34,25 @@ char	*find_command_path(char *cmd, char **envp)
 		path->i++;
 	}
 	if (!path->path_env)
-		error();
+	{
+		free(path);
+		ret_str = NULL;
+		return (ret_str);
+	}
 	path->paths = ft_split(path->path_env, ':');
 	if (!path->paths)
-		error();
+	{
+		free(path);
+		ret_str = NULL;
+		return (ret_str);
+	}
 	path->full_path = add_permission_free_path(path, cmd);
 	if (path->full_path)
 		return (path->full_path);
 	free_paths(path, 0);
 	free(path);
-	return (NULL);
+	ret_str = NULL;
+	return (ret_str);
 }
 
 int	ft_in_out(char *file, int mode)
@@ -69,9 +84,14 @@ t_cmd	*init_cmd(char **argv)
 
 	cmd = malloc(sizeof(t_cmd));
 	if (!cmd)
-		error();
+		return (cmd = NULL, cmd);
 	cmd->parse[0] = init_parse(argv[1], argv[2], true);
 	cmd->parse[1] = init_parse(argv[4], argv[3], false);
+	if (!cmd->parse[0] || !cmd->parse[1])
+	{
+		free(cmd);
+		return (cmd = NULL, cmd);
+	}
 	cmd->fd_in = argv[1];
 	cmd->fd_out = argv[4];
 	cmd->envp = NULL;
@@ -117,14 +137,21 @@ int	main(int argc, char **argv, char **envp)
 	}
 	pid_info = initialize_pid();
 	cmd = init_cmd(argv);
+	if (!cmd)
+	{
+		free(pid_info);
+		write(2, "Error: malloc\n", 14);
+		exit(EXIT_FAILURE);
+	}
 	if (cmd->in_fd == -1)
 		perror("\033[31mError");
 	if (cmd->out_fd == -1)
 		free_cmd_err(cmd, pid_info, 1);
 	if (pipe_and_fork(cmd, envp, pid_info) == -1)
 		free_cmd_err(cmd, pid_info, 1);
-	waitpid(pid_info->pid1, &pid_info->status1, 0);
-	waitpid(pid_info->pid2, &pid_info->status2, 0);
+	if ((waitpid(pid_info->pid1, &pid_info->status1, 0) == -1)
+		|| (waitpid(pid_info->pid2, &pid_info->status2, 0)) == -1)
+		free_cmd_err(cmd, pid_info, 1);
 	exit_stat = exit_status(pid_info->status1, pid_info->status2);
 	free_cmd_err(cmd, pid_info, 0);
 	if (exit_stat)

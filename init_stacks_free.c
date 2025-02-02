@@ -34,7 +34,10 @@ t_path	*initialize_path(void)
 
 	path = malloc(sizeof(t_path));
 	if (!path)
-		error();
+		{
+			path = NULL;
+			return (path);
+		}
 	path->path_env = NULL;
 	path->paths = NULL;
 	path->full_path = NULL;
@@ -50,8 +53,8 @@ t_parser	*initialize_parser(const char *command, char **args, char *token)
 	parser = malloc(sizeof(t_parser));
 	if (!parser)
 	{
-		perror("malloc");
-		exit(EXIT_FAILURE);
+		parser = NULL;
+		return (parser);
 	}
 	parser->command = command;
 	parser->i = 0;
